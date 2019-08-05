@@ -1,0 +1,256 @@
+---
+title: "Analysis of Rhythms"
+author: 
+- name: Dr. Bharath Ananthasubramaniam  |  [I'm on Twitter](https://twitter.com/bharath_ananth)
+  email: bharath.ananth@charite.de
+output: 
+  learnr::tutorial:
+    progressive: true
+    theme: sandstone
+bibliography: bibliography.bib
+csl: cell.csl
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(gridExtra)
+library(ggplot2)
+theme_set(theme_bw())
+options(shiny.port=2123, tutorial.exercise.timelimit=60)
+```
+
+
+## Circadian data
+***
+<br>
+..is typically a series of observations in time (**timeseries**)
+
+> Rhythmicity only requires a repeating pattern approx. every 24h.
+
+![](images/parameters.png){width=400px}
+
+$A$ = (absolute) amplitude
+
+$m$ = magnitude 
+
+$\tau$ = intrinsic period
+
+$\phi$ = phase
+
+$a = \frac{A}{m}$ = relative amplitude: amplitude as a fraction of the magnitude
+
+$f = \frac{1 + a}{1-a} = \frac{m + A}{m - A}$ = fold-amplitude = ratio of peak to trough values<br/>
+
+##### Exercise
+*Calculate relative amplitude and fold-amplitude and then do the same after changing $m$ from 12 to 24*
+
+*Check that you get the same values for from two ways of calculating $f$*
+```{r rhy_params, exercise=TRUE, exercise.lines=5}
+A <- 6
+m <- 12
+
+```
+
+```{r rhy_params-solution}
+a <- A/m
+f <- (1+a)/(1-a)
+a
+f
+```
+
+
+The true scale (*left*) provides the absolute amplitude, while the normalized scale (*right*) provides the relative amplitude and fold-amplitude.
+
+```{r plot_sine, eval=TRUE, fig.height=3}
+A <- 6
+m <- 12
+t <- seq(0, 24, by = 0.5)
+df <- data.frame(t, s = m + A*sin(2*pi*t/24))
+f1 <- ggplot(df) + geom_line(aes(x=t, y = s)) + theme_bw() +
+  labs(title = "Actual scale", x = "time", y="") 
+a <- A/m
+df <- data.frame(t, s = 1 + a*sin(2*pi*t/24))
+f2 <- ggplot(df) + geom_line(aes(x=t, y = s)) + theme_bw() +
+  labs(title = "Normalized scale", x = "time", y="")
+grid.arrange(f1, f2, nrow=1)
+```
+
+## Waveforms
+***
+<br>
+>The sinusoidal shape is only for mathematical convenience.
+
+In reality, many shapes are possible
+
+![](images/weird_rhythms.png){width=500px}
+
+
+## Analysis goals
+***
+<br>
+**Why** do we do want to perform this analysis?
+
+1. decide if timeseries is rhythmic or not 
+
+2. if rhythmic, compute the rhythm parameters ($A, a, m, \tau$)<br/> <br/>
+
+
+> The ability to do this greatly affected by the Experimental Design (more on this later)
+
+## Sampling scheme
+***
+<br><br>
+![](images/sampling_schemes.png){width=600px}
+<br><br>
+Many common techniques such as qPCR and western blots can yield either type of data!
+<br>
+
+## Genomic data {data-progressive=TRUE}
+***
+<br>
+
+Let us begin with an example of *preprocessed* microarray data from the mouse liver (@hughes_harmonics_2009). The data were collected in constant dark over 48h, one sample every hour. Mice were sacrified to obtain a sample -- so we have an **independent sampling** scheme.
+
+```{r hughes_intro-setup, eval=TRUE, include=FALSE}
+data("cycMouseLiverRNA", package = "MetaCycle")
+hughes_data <- gather(cycMouseLiverRNA, time ,expr, -geneName)
+hughes_data$time <- as.numeric(gsub("CT","",hughes_data$time))
+```
+### Ex. 1
+*View the dataset*
+```{r hughes_intro, exercise = TRUE, fig.height=3, exercise.lines = 2}
+cycMouseLiverRNA
+```
+### Ex. 2
+*Plot a couple of your favorite clock genes (probe names are in the leftmost column of the data)*
+```{r hughes_plot1, exercise=TRUE, exercise.setup="hughes_intro-setup", fig.height=3, exercise.lines=2}
+
+```
+
+```{r hughes_plot1-hint, exercise.eval=FALSE}
+qplot(time, expr, data=filter(hughes_data, geneName == "Per2_1417602_at"))
+```
+
+> It is usual to plot gene expression data in the **log<sub>2</sub>** scale. 
+
+### Ex. 3
+*Can you plot the same clock gene in the log scale?*
+
+```{r hughes_plot2, exercise=TRUE, exercise.setup="hughes_intro-setup", fig.height=3, exercise.lines=2}
+
+```
+
+```{r hughes_plot2-hint, exercise.eval=FALSE}
+qplot(time, log2(expr), data=filter(hughes_data, geneName == "Per2_1417602_at"))
+```
+
+## Harmonic Regression
+***
+> We are going to first discuss detection of rhythms only. Estimation of amplitude and phase will come up later.
+
+The is the simplest approach to rhythm analysis. A cosine curve is fit to the timeseries ($y$)
+
+$$ y(t) = m + A\cos\left(\frac{2\pi t}{\tau} - \phi\right)$$ Do you recognise the different parameters from [earlier](#section-circadian-data)?
+
+$$ y(t) = m + c_1 \cos\left(\frac{2\pi t}{\tau}\right) + c_2 \sin\left(\frac{2\pi t}{\tau}\right)$$
+
+If you can confidently fix $\tau$, for e.g., $\tau = 24$ for mice or $\tau = 22.5$ for *N. crassa*, then this becomes a least-squares fitting exercise. You might be more familiar with this as linear regression or fitting a straight line through a cloud of points. 
+
+Since a model (the sine curve) is fit to the data is termed a **parametric** approach in statistics 
+
+### Ex. 1
+*View the first few lines of the dataset using `head` command*
+```{r hughes_data, exercise=TRUE, exercise.lines=8}
+
+```
+
+```{r hughes_data-hint, exercise.eval=FALSE}
+# To see the list of datasets in this package
+# data(package="analyzeRhythmsdata")
+
+# Load the dataset
+data("hughes_2009_liver", package = "analyzeRhythmsdata")
+
+# View the first few rows of the dataset
+head(hughes_2009_liver)
+```
+
+### Ex. 2
+```{r hughes_harmonic-setup, eval=TRUE, include=FALSE}
+library(HarmonicRegression)
+data("hughes_2009_liver", package = "analyzeRhythmsdata")
+```
+*Use the `harmonic.regression()` in the package `HarmonicRegression` for rhythm analysis. Run the analysis on the @hughes_harmonics_2009 data and store in the 'results' variable*
+
+*View the contents of the results. It includes amplitudes, phases and p-values*
+```{r hughes_harmonic, exercise=TRUE}
+
+```
+
+```{r hughes_harmonic-solution}
+times <- seq(1,48) # create a vector that has the series of time points
+
+hughes_data <- as.matrix(hughes_2009_liver[-1]) ## take only the expression values with the gene symbols in the first column
+rownames(hughes_data) <- hughes_2009_liver$GeneName ## data matrix in R can have only rownames and columnnames
+
+hughes_data <- t(hughes_data) ## harmonic.regression requires genes in colums and time across rows. t() is a transpose operator
+
+results <- harmonic.regression(inputts = hughes_data, 
+                               inputtime = times, 
+                               Tau = 24, 
+                               normalize = TRUE)
+
+ls.str(results)
+
+```
+
+
+Advantages | |Disadvantages
+-----------|-|-------------
+Regression is very very fast | | Assumes rhythms of interest have sine waveform (recall this [topic](#section-circadian-data))
+Works for many different types of data (independent and longitudinal sampling) | | The noise in your data must be Gaussian and independent between samples. Outliers really can mess things up. | | Assumes period $\tau$ is known and you do not care of small deviations in the period.
+Unevenly-spaced or missing samples are not a problem | | 
+Amplitude and phase estimates are directly available | | 
+Easily used within standard tools for differential gene expression, such as `limma/edgeR` and `DESeq2` | | 
+Very flexible. So other trends in data can be included| | 
+
+## P-values - Q-values
+***
+<br>
+When analyzing a genomic dataset, the results provide a p-value for each transcript (in this example). P-value is the probability of obtaining the best fit purely by chance.  
+
+## Non-parametric approaches
+***
+<br>
+Two popular (and similar) approaches in this category are `JTKcycle` (@hughes_jtk_cycle:_2010) and `rain` (@thaben_detecting_2014).
+
+Both these methods relax the assumption about the strictly sinusoidal shape of the rhythms. More importantly, they only look for patterns of alternating increasing and decreasing values. So scale of the data (normal or log scale) does not matter. 
+
+>JTKcycle
+
+Advantages | | Disadvantages
+-----------|-|--------------
+Robust to outliers | | Requires integer-intervals and even spacing between samples 
+High computational efficiency | | Dispersed output parameters (P-value, period and phase) for low resolution data
+Improved power in analyzing data with duplicate samples | | Cosine curve bias
+Works with missing data and replicates | | False negative rate issue for low resolution timeseries
+Does not assume specific noise distribution | | Less accurate phase for low resolution timeseries
+Can test for a range of periods ($\tau$) | |
+
+> RAIN
+
+Advantages | | Disadvantages
+-----------|-|--------------
+Unequal length of increasing and decreasing portions of the curve (removes any cosine curve bias)     | | Can be slow for long timeseries
+All advantages of JTKcycle  | | Underpowered for short timeseries as bootstrapping provides clustered p-values
+P-values are estimated using bootstrapping  |    |    Clustered distribution of p-values can affect multiple-testing correction method
+Does not require integer-intervals between samples |  | 
+
+> Both methods can only be applied on longitudinal timeseries from a single biological unit timeseries.
+
+
+
+## References and Resources
