@@ -44,7 +44,7 @@ $a = \frac{A}{m}$ = relative amplitude: amplitude as a fraction of the magnitude
 
 $f = \frac{1 + a}{1-a} = \frac{m + A}{m - A}$ = fold-amplitude = ratio of peak to trough values<br/>
 
-##### Exercise
+### Exercise
 *Calculate relative amplitude and fold-amplitude and then do the same after changing $m$ from 12 to 24*
 
 *Check that you get the same values for from two ways of calculating $f$*
@@ -81,6 +81,7 @@ grid.arrange(f1, f2, nrow=1)
 ## Waveforms
 ***
 <br>
+
 >The sinusoidal shape is only for mathematical convenience.
 
 In reality, many shapes are possible
@@ -93,7 +94,7 @@ In reality, many shapes are possible
 <br>
 **Why** do we do want to perform this analysis?
 
-1. decide if timeseries is rhythmic or not 
+1. decide if the timeseries is rhythmic or not 
 
 2. if rhythmic, compute the rhythm parameters ($A, a, m, \tau$)<br/> <br/>
 
@@ -134,9 +135,10 @@ cycMouseLiverRNA
 qplot(time, expr, data=filter(hughes_data, geneName == "Per2_1417602_at"))
 ```
 
+### Ex. 3
+
 > It is usual to plot gene expression data in the **log<sub>2</sub>** scale. 
 
-### Ex. 3
 *Can you plot the same clock gene in the log scale?*
 
 ```{r hughes_plot2, exercise=TRUE, exercise.setup="hughes_intro-setup", fig.height=3, exercise.lines=2}
@@ -149,7 +151,7 @@ qplot(time, log2(expr), data=filter(hughes_data, geneName == "Per2_1417602_at"))
 
 ## Harmonic Regression
 ***
-> We are going to first discuss detection of rhythms only. Estimation of amplitude and phase will come up later.
+> We are going to first discuss detection of rhythms only. Estimation of amplitude and phase will come later.
 
 The is the simplest approach to rhythm analysis. A cosine curve is fit to the timeseries ($y$)
 
@@ -161,7 +163,18 @@ If you can confidently fix $\tau$, for e.g., $\tau = 24$ for mice or $\tau = 22.
 
 Since a model (the sine curve) is fit to the data is termed a **parametric** approach in statistics 
 
+Advantages | |Disadvantages
+-----------|-|-------------
+Regression is very very fast | | Assumes rhythms of interest have sine waveform (recall this [topic](#section-circadian-data))
+Works for many different types of data (independent and longitudinal sampling) | | The noise in your data must be Gaussian and independent between samples. Outliers really can mess things up. | | Assumes period $\tau$ is known and you do not care of small deviations in the period.
+Unevenly-spaced or missing samples are not a problem | | 
+Amplitude and phase estimates are directly available | | 
+Easily used within standard tools for differential gene expression, such as `limma/edgeR` and `DESeq2` | | 
+Very flexible. So other trends in data can be included| | 
+
 ### Ex. 1
+
+*Let us look at the same liver dataset from before.*
 *View the first few lines of the dataset using `head` command*
 ```{r hughes_data, exercise=TRUE, exercise.lines=8}
 
@@ -203,24 +216,11 @@ results <- harmonic.regression(inputts = hughes_data,
                                Tau = 24, 
                                normalize = TRUE)
 
-ls.str(results)
+ls.str(results) # the same information is available from the help for the function, i.e., type ?harmonic.regression
 
 ```
 
-
-Advantages | |Disadvantages
------------|-|-------------
-Regression is very very fast | | Assumes rhythms of interest have sine waveform (recall this [topic](#section-circadian-data))
-Works for many different types of data (independent and longitudinal sampling) | | The noise in your data must be Gaussian and independent between samples. Outliers really can mess things up. | | Assumes period $\tau$ is known and you do not care of small deviations in the period.
-Unevenly-spaced or missing samples are not a problem | | 
-Amplitude and phase estimates are directly available | | 
-Easily used within standard tools for differential gene expression, such as `limma/edgeR` and `DESeq2` | | 
-Very flexible. So other trends in data can be included| | 
-
-## P-values - Q-values
-***
-<br>
-When analyzing a genomic dataset, the results provide a p-value for each transcript (in this example). P-value is the probability of obtaining the best fit purely by chance.  
+The important information in this list are `pars` (contains amplitudes and phase), `pvals` (p-values) and `qvals` (q-values).
 
 ## Non-parametric approaches
 ***
@@ -251,6 +251,12 @@ Does not require integer-intervals between samples |  |
 
 > Both methods can only be applied on longitudinal timeseries from a single biological unit timeseries.
 
+
+
+## Experimental design
+
+
+## ANOVA 
 
 
 ## References and Resources
