@@ -7,6 +7,7 @@ output:
   learnr::tutorial:
     progressive: true
     theme: sandstone
+    highlight: textmate
 bibliography: bibliography.bib
 csl: cell.csl
 runtime: shiny_prerendered
@@ -32,13 +33,13 @@ options(shiny.port=2123, tutorial.exercise.timelimit=180)
 
 ![](images/parameters.png){width=400px}
 
-$A$ = (absolute) amplitude
+$A$ = (absolute) amplitude  
 
-$m$ = magnitude 
+$m$ = magnitude  
 
-$\tau$ = intrinsic period
+$\tau$ = intrinsic period  
 
-$\phi$ = phase
+$\phi$ = phase  
 
 $a = \frac{A}{m}$ = relative amplitude: amplitude as a fraction of the magnitude
 
@@ -48,7 +49,7 @@ $f = \frac{1 + a}{1-a} = \frac{m + A}{m - A}$ = fold-amplitude = ratio of peak t
 *Calculate relative amplitude and fold-amplitude and then do the same after changing $m$ from 12 to 24*
 
 *Check that you get the same values for from two ways of calculating $f$*
-```{r rhy_params, exercise=TRUE, exercise.lines=5}
+```{r rhy_params, exercise=TRUE, exercise.lines=8}
 A <- 6
 m <- 12
 
@@ -84,7 +85,7 @@ grid.arrange(f1, f2, nrow=1)
 
 >The sinusoidal shape is only for mathematical convenience.
 
-In reality, many shapes are possible
+In reality, many shapes are possible  
 
 ![](images/weird_rhythms.png){width=500px}
 
@@ -105,8 +106,9 @@ In reality, many shapes are possible
 ***
 <br><br>
 ![](images/sampling_schemes.png){width=600px}
-<br><br>
-Many common techniques such as qPCR and western blots can yield either type of data!
+<br><br><br>
+
+Many common techniques, such as qPCR and western blots, can yield either type of data!
 <br>
 
 ## Genomic data
@@ -157,11 +159,11 @@ The is the simplest approach to rhythm analysis. A cosine curve is fit to the ti
 
 $$ y(t) = m + A\cos\left(\frac{2\pi t}{\tau} - \phi\right)$$ Do you recognise the different parameters from [earlier](#circadian-data)?
 
-$$ y(t) = m + c_1 \cos\left(\frac{2\pi t}{\tau}\right) + c_2 \sin\left(\frac{2\pi t}{\tau}\right)$$
+$$ y(t) = m + c_1 \cos\left(\frac{2\pi t}{\tau}\right) + c_2 \sin\left(\frac{2\pi t}{\tau}\right)$$  
 
-If you can confidently fix $\tau$, for e.g., $\tau = 24$ for mice or $\tau = 22.5$ for *N. crassa*, then this becomes a least-squares fitting exercise. You might be more familiar with this as linear regression or fitting a straight line through a cloud of points. 
+If you can confidently fix $\tau$, for e.g., $\tau = 24$ for mice or $\tau = 22.5$ for *N. crassa*, then this becomes a least-squares fitting exercise. You might be more familiar with this as linear regression or fitting a straight line through a cloud of points.  
 
-Since a model (the sine curve) is fit to the data is termed a **parametric** approach in statistics 
+Since a model (the sine curve) is fit to the data is termed a **parametric** approach in statistics.  
 
 Advantages | |Disadvantages
 -----------|-|-------------
@@ -436,7 +438,7 @@ The `MetaCycle` that contains the JTKcycle method performs these two steps and p
 
 **Note** `harmonic.regression` give you the relative and *not* the absolute amplitudes.
 
-> A common variation is to follow a q-value based selection of rhythmic timeseries by a further relative amplitude based filtering.
+> It is common to follow a q-value-based selection of rhythmic timeseries by a relative amplitude-based filtering.
 
 The thinking behind this is as follows. The p-value provides a statistical measure of rhythmicity of a timeseries. It is not uncommon at all to find timeseries that have a very small amplitudes yet have very significant rhythms. 
 
@@ -445,8 +447,39 @@ Such timeseries are statistically but *not* biologically significant. Therefore,
 > So statistics are important. But don't get obsessed by the p-values/q-values. Biological relevance is equally important.
 
 
-
 ## Experimental design
+***
+<br>
+
+As mentioned earlier, the ability to detect rhythms is extremely sensitive to the sampling of the timeseries.
+
+> For the very good rhythm detection, the current consensus is sampling every 2h over two circadian cycles. 
+
+> For estimating phases and amplitudes, higher sampling is preferred. Accuracy of phase is about half the sampling interval.
+
+
+## Workflow
+***
+<br>
+
+Step 1. Get organized data into your computer or get public datasets from repositories such as GEO using `GEOquery` package.  
+
+Step 2. Preprocess the data to a matrix of values. E.g., using `oligo` or `affy` packages for microsarray and alignment and counting using `Rsubread`.  
+
+Step 3. Normalize the data according to the technology for inter-sample variation  
+
+Step 4. Exploratory analysis to check for batch effects, bad samples etc.  
+
+Step 5. Filtering out lowly-expressed genes based on mean/median expression.  
+
+Step 6. Rhythm analysis for detecting rhythms and estimating parameters.  
+
+Step 7. Select rhythmic genes according q-value and optionally the relative amplitude.  
+
+Step 8. Plot the results, perform GO analysis, ....   
+
+
+
 
 
 ## Smaller datasets
@@ -463,9 +496,29 @@ The most statistically powerful method (when all else fails/one should start wit
 
 ## Golden Rules
 
-**1.**
+**1.** Always look at the data. Seeing is believing. If you cannot see the rhythms it is probably not there.
 
-**2.**
+**2.** Include all effects in analysis, e.g., different batches, different cultures. Check if they matter before ignoring them.
+
+**3.** Think about the analysis before you run experiments. If needed get in touch with biostatistician/bioinformatician.
+
+**4.** P-value > threshold does not mean the timeseries is not rhythmic, only that the evidence is inconclusive. Absence of evidence is **not** evidence of absence.
+
+**5.** Never duplicate and concatenate data before running statistics (@hughes_guidelines_2017)
+
+**6.** Control for multiple testing (@hughes_guidelines_2017)
+
+**7.** Deposit your raw data into public repositories (@hughes_guidelines_2017)
+
+**8.** Never directly alter the raw data. Always save any processed data separately.
 
 ## References and Resources
  Learn programming in R with free [book](https://r4ds.had.co.nz)  |      ![](images/cover_wickham.png){width=100px}
+ 
+ Well-managed repositories for biological data analysis [Bioconductor](https://www.bioconductor.org/). They also have many workflows and tools to make your life easier.
+ 
+ Exploratory analysis and pre-processing (before rhythm analysis) workflows for microarrays (on [bioconductor](https://www.bioconductor.org/packages/release/workflows/vignettes/arrays/inst/doc/arrays.html)) and RNA-seq (@love_rna-seq_2015)
+ 
+ Designing and conducting circadian RNA-seq study (@li_considerations_2015)  
+
+### References
