@@ -12,8 +12,7 @@ Description: There are many proposed methods for circadian rhythm analysis. Ofte
     ii.	to make you aware of the limitations and caveats of the methods
     iii.	to enable you to spot basic problems with your data
     iv.	to direct you to resources to learn more
-    v.	most importantly, to make you think about these issue BEFORE you design your experiments
-    
+    v.	most importantly, to make you think about these issue BEFORE you design your experiments.
     This tutorial was made for Trainee Day, European Biological Rhythms Society Conference (EBRS) 2019.
 License: MIT + file LICENSE
 Encoding: UTF-8
