@@ -3,6 +3,8 @@ title: "Analysis of Rhythms"
 author: 
 - name: Dr. Bharath Ananthasubramaniam  |  [I'm on Twitter](https://twitter.com/bharath_ananth)
   email: bharath.ananth@charite.de
+  affiliation: Institute for Theoretical Biology, Charite Universitaetsmedizin, Berlin
+date: "`r format(Sys.time(), '%d %B %Y')`"
 output: 
   learnr::tutorial:
     progressive: true
@@ -541,12 +543,15 @@ The most statistically powerful method (when all else fails/one should start wit
 ## References and Resources
  Learn programming in R with free [book](https://r4ds.had.co.nz)  |      ![](images/cover_wickham.png){width=100px}
  
+ [MetaCycle](https://cran.r-project.org/web/packages/MetaCycle/vignettes/implementation.html) package for running three different rhythm analysis tools 
+ 
  Well-managed repositories for biological data analysis [Bioconductor](https://www.bioconductor.org/). They also have many workflows and tools to make your life easier.
  
  Exploratory analysis and pre-processing (before rhythm analysis) workflows for microarrays (on [bioconductor](https://www.bioconductor.org/packages/release/workflows/vignettes/arrays/inst/doc/arrays.html)) and RNA-seq (@love_rna-seq_2015)
  
  Designing and conducting circadian RNA-seq study (@li_considerations_2015)
  
- [BioDare](https://biodare2.ed.ac.uk/) -- Fast period analysis, timeseries processing and aesthetic visualizations  
+ [BioDare](https://biodare2.ed.ac.uk/) -- Fast period analysis, timeseries processing and aesthetic visualizations
+ 
 
 ### References
