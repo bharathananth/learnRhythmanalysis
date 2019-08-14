@@ -53,4 +53,4 @@ Bring your **fully-charged** laptops to the session.
 
 Preferably, follow steps 0-6 in the installation guide **before** trainee day.  
 
-Come with your data, curiousity and questions.
+Come with your data, curiousity and questions. Look forward to seeing you.

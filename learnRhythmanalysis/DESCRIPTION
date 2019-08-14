@@ -1,7 +1,7 @@
 Package: learnRhythmanalysis
 Type: Package
 Title: An Introduction to Analysis of Circadian Rhythms in Biological Data.
-Version: 1.0.0
+Version: 0.1.0
 Author: person("Bharath", "Ananthasubramaniam", email="bharath.ananth@charite.de", role = c("aut","cre"))
 Maintainer: The package maintainer <bharath.ananth@charite.de>
 Description: There are many proposed methods for circadian rhythm analysis. Often, it is unclear 

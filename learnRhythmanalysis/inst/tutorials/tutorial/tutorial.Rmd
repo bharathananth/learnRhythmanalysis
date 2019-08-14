@@ -128,42 +128,55 @@ hughes_data <- gather(cycMouseLiverRNA, time ,expr, -geneName)
 hughes_data$time <- as.numeric(gsub("CT","",hughes_data$time))
 ```
 ### Ex. 2
-*View the dataset*
+*The data is in a `data.frame` called `cycMouseLiverRNA`. View the dataset by typing the name of the dataset and "Run"*
 ```{r hughes_intro, exercise = TRUE, fig.height=3, exercise.lines = 2}
-cycMouseLiverRNA
+
 ```
 ### Ex. 3
-*Plot a few of your favorite clock genes (probe names are in the leftmost column of the data)*
+*To be able to plot using `ggplot2` one needs the above data in a different 'long' format. The `cycMouseLiverRNA` in the long form is stored in `hughes_data`.*
+*Plot a few of your favorite clock genes from `hughes_data`(probe names are in the leftmost column of the data)*
 ```{r hughes_plot1, exercise=TRUE, exercise.setup="hughes_intro-setup", fig.height=3, exercise.lines=2}
 
 ```
 
-```{r hughes_plot1-hint, exercise.eval=FALSE}
-qplot(time, expr, data=filter(hughes_data, geneName == "Per2_1417602_at"), xlab = "time (h)", ylab = "expression")
+```{r hughes_plot1-hint-1}
+# View the data to find the columns containing the time and expression values.
+hughes_data
+```
+
+```{r hughes_plot1-hint-2}
+# Plot the timeseries using qplot from ggplot2. `filter` is used to select data for the desired gene.
+qplot(time, expr, 
+      data=filter(hughes_data, geneName == "Per2_1417602_at"), 
+      xlab = "time (h)", ylab = "expression")
 ```
 
 ### Ex. 4
 
 > It is usual to plot gene expression data in the **log<sub>2</sub>** scale. 
 
-*Can you plot the same clock gene in the log scale?*
+*Can you plot the same clock gene in the log<sub>2</sub> scale?*
 
 ```{r hughes_plot2, exercise=TRUE, exercise.setup="hughes_intro-setup", fig.height=3, exercise.lines=2}
 
 ```
 
 ```{r hughes_plot2-hint, exercise.eval=FALSE}
-qplot(time, log2(expr), data=filter(hughes_data, geneName == "Per2_1417602_at"), xlab = "time (h)", ylab = "log2 expression")
+# Use the `log2` function to transform the expression values.
+qplot(time, log2(expr),
+      data=filter(hughes_data, geneName == "Per2_1417602_at"), 
+      xlab = "time (h)", ylab = "log2 expression")
 ```
 
 ## Harmonic Regression
 ***
 > We are going to first discuss detection of rhythms only. Estimation of amplitude and phase will come later.
 
-The is the simplest approach to rhythm analysis. A cosine curve is fit to the timeseries ($y$)
+This is the simplest approach to rhythm analysis. A cosine curve is fit to the timeseries ($y$)
 
-$$ y(t) = m + A\cos\left(\frac{2\pi t}{\tau} - \phi\right)$$ Do you recognise the different parameters from [earlier](#circadian-data)?
+$$ y(t) = m + A\cos\left(\frac{2\pi t}{\tau} - \phi\right)$$ 
 
+Do you recognise the different parameters from [earlier](#circadian-data)?  
 
 The above equation is exactly the same as this one:  
 
@@ -185,6 +198,7 @@ Very flexible. So other trends in data can be included| |
 ### Ex. 5
 
 *Let us look at the same liver dataset from before.*
+*Load the data in the workspace*
 *View the first few lines of the dataset using `head` command*
 ```{r hughes_data, exercise=TRUE, exercise.lines=8}
 
@@ -192,10 +206,10 @@ Very flexible. So other trends in data can be included| |
 
 ```{r hughes_data-solution, exercise.eval=FALSE}
 # To see the list of datasets in this package
-# data(package="analyzeRhythmsdata")
+# data(package="learnRhythmanalysis")
 
 # Load the dataset
-data("hughes_2009_liver", package = "analyzeRhythmsdata")
+data("hughes_2009_liver", package = "learnRhythmanalysis")
 
 # View the first few rows of the dataset
 head(hughes_2009_liver)
@@ -205,9 +219,9 @@ head(hughes_2009_liver)
 
 ```{r hughes_harmonic-setup, eval=TRUE, include=FALSE}
 library(HarmonicRegression)
-data("hughes_2009_liver", package = "analyzeRhythmsdata")
+data("hughes_2009_liver", package = "learnRhythmanalysis")
 ```
-*Use the `harmonic.regression()` in the package `HarmonicRegression` for rhythm analysis. Run the analysis on the @hughes_harmonics_2009 data and store the results in the 'results' variable*
+*Use the `harmonic.regression()` function in the package `HarmonicRegression` for rhythm analysis. Run the analysis on the @hughes_harmonics_2009 data and store the results in the `results` variable*
 
 *View the contents of the results. It includes amplitudes, phases and p-values*
 ```{r hughes_harmonic, exercise=TRUE}
@@ -235,7 +249,9 @@ data("hughes_2009_liver", package = "analyzeRhythmsdata")
 
 hughes_data <- as.matrix(hughes_2009_liver[-1]) ## drop the gene symbols in the first column)
 rownames(hughes_data) <- hughes_2009_liver$GeneName ## matrix in R can have rownames and columnnames
+```
 
+```{r hughes_harmonic-hint-3}
 ## Step 3. Transpose the data (genes in columns and times in rows) as `harmonic.regression` needs this format.
 
 hughes_data <- t(hughes_data) ## t() is a transpose operator
@@ -243,7 +259,9 @@ hughes_data <- t(hughes_data) ## t() is a transpose operator
 ## Step 4. Create a vector of time points to match samples to times (this information is in the column names of the original data)
 
 times <- seq(1,48) # create a vector of sample times
+```
 
+```{r hughes_harmonic-hint-4}
 ## Step 5. Run the analysis with the required parameters.
 
 results <- harmonic.regression(inputts = hughes_data, 
@@ -272,9 +290,9 @@ Normally, we correct the p-values for multiple testing to obtain **q-values** or
 
 ### Ex. 7
 
-*We have generate matrix of random (normally distributed) values, i.e., there are no rhythms in this data.*
+*I have generated a matrix of random (normally distributed) values, i.e., there are no rhythms in this data.*
 
-*First, run the code to perform harmonic regression*
+*First, perform harmonic regression*
 
 *Then, find the number of timeseries with p-value < 0.05*
 
@@ -288,6 +306,7 @@ data <- matrix(rnorm(48*1000), ncol=48)
 ```{r noise_data, exercise=TRUE}
 ## View the random data if you like
 # head(data)
+
 ## Show the dimension of the data (rows columns)
 sprintf("The size of the dataset: %d", dim(data))
 
@@ -304,12 +323,15 @@ sum(results$pvals < 0.05)
 ```
 
 ```{r noise_data-hint-2}
-## Correcting for multiple-testing using Benjamini-Hochberg using `p.adjust`
+## Correct for multiple-testing using Benjamini-Hochberg using `p.adjust`
 ## but harmonic regression already does this for you
 sum(results$qvals < 0.05)
 ```
 
 **Note** The fraction of "rhythmic" timeseries found by the analysis is approximately `1000 * 0.05`  
+<br>
+
+***
 <br>
 
 ```{r noise_p_dist, eval=TRUE, fig.width=6}
@@ -326,7 +348,7 @@ qplot(x = results$pvals, geom = "histogram", bins=50) + xlab("p-values") + ylab(
 On the other hand the p-value distribution on the real data we analyzed earlier, looks like
 ```{r hughes_p_dist, eval=TRUE, fig.width=6}
 library(HarmonicRegression)
-data("hughes_2009_liver", package = "analyzeRhythmsdata")
+data("hughes_2009_liver", package = "learnRhythmanalysis")
 
 hughes_data <- as.matrix(hughes_2009_liver[-1]) 
 times <- seq(1,48)
@@ -341,7 +363,7 @@ qplot(x = results$pvals, geom = "histogram", bins=50) + xlab("p-values") + ylab(
 
 To learn about interpreting p-value distributions read [this post](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/). **Note** these insights are only for the p-value distribution not for the q-values.
 
-> In summary, if you *do not* see a p-value distribution that is flat except for a peak at the left end (near zero), then something is not okay with analysis/method
+> In summary, if you *do not* see a p-value distribution that is flat except for a peak at the left end (near zero), then something is not okay with your *parametric * method.
 
 
 ## Non-parametric approaches
@@ -365,12 +387,12 @@ Can test for a range of periods ($\tau$) | |
 
 ### Ex. 8
 
-*Apply JTKcycle on the @hughes_harmonics_2009 dataset*
+*Apply JTKcycle on the @hughes_harmonics_2009 dataset* (**Note**: this is going to be slow, so be patient.)
 
 *View the results and the top 10 rhythmic genes*
 ```{r JTKcycle_run-setup, eval=TRUE}
 library(MetaCycle)
-data("hughes_2009_liver", package = "analyzeRhythmsdata")
+data("hughes_2009_liver", package = "learnRhythmanalysis")
 ```
 
 ```{r JTKcycle_run, exercise=TRUE}
@@ -379,7 +401,9 @@ data("hughes_2009_liver", package = "analyzeRhythmsdata")
 ## Step 2: Vector of sample times
 times <- seq(1,48)
 
-## Step 3: Run meta2d (that has three methods JTKcycle, Lomb-Scargle and ARSER). The call is complex as it was originally only designed to work with files.
+## Step 3: Run meta2d (that has three methods JTKcycle, Lomb-Scargle and ARSER). 
+## Here we will use only JTKcycle.
+## The call is complex as it was originally only designed to work with files.
 results <- meta2d(inDF = hughes_2009_liver,
                   timepoints = times,
                   minper = 24,
@@ -414,6 +438,10 @@ Does not require integer-intervals between samples |  |
 
 ### Ex. 9
 
+*Now, we will test `rain` on RNA-seq data of the mouse liver. This dataset comes with `rain` package. It has six timepoints over 24h with two replicates at each timepoint.*
+*As always load the data and view it*
+*Run the RAIN analysis*
+*Remember to correct for multiple testing as RAIN does not do this for you*
 ```{r rain_run-setup, eval=TRUE}
 library(rain)
 data(menetRNASeqMouseLiver, package="rain")
@@ -443,13 +471,17 @@ head(menet.ossc)
 ```
 
 ```{r rain_run-hint-3}
-## Step 5: Correct p-values for multiple testing using Benjamini-Hochberg
-menet.ossc <- transform(adjusted.pVal = p.adjust(pVal, method = "BH"))
+## Step 5: Correct p-values for multiple testing using Benjamini-Hochberg and view the top genes
+# the `transform` function lets you add new columns to the data.frame from the already present columns.
+menet.ossc <- transform(menet.ossc, 
+                        adjusted.pVal = p.adjust(pVal, method = "BH"))
 
-head(menet.ossc)
+head(menet.ossc[order(menet.ossc$adjusted.pVal),], n=10)
 ```
 
-> Please do **not** use phase estimates from `rain`. We will come to parameter estimation next.
+**Note:** The identical p-values and adjusted p-values for many genes. This common in non-parametric tests -- it will become less obvious with more data per timeseries.
+
+> Please do **not** use phase or period estimates from `rain` or `JTKcycle`. We will come to parameter estimation next.
 
 > Both methods can only be applied on longitudinal timeseries from a single biological unit timeseries.
 
@@ -457,13 +489,13 @@ head(menet.ossc)
 ***
 <br>
 
-The three tests discussed are used to detect rhythms (recall [slide](#analysis-goals)). The standard approach is to follow detection by Harmonic Regression on the timeseries to obtain amplitudes and phases.  
+The three tests discussed are used to detect rhythms (recall [slide](#analysis-goals)). The standard approach is to follow *rhythm detection* by harmonic regression on the timeseries to obtain amplitudes and phases (*parameter estimation*).  
 
-Both detection and estimation are done together in the parametric Harmonic regression. But the non-parametric methods are performed in two steps.   
+Both detection and estimation are done together in the parametric harmonic regression. But the non-parametric methods are performed in two steps.   
 
-The `MetaCycle` that contains the JTKcycle method performs these two steps and provides amplitude and phase estimates in the results. On the other hand, `rain` must be followed by `harmonic.regression` to get the amplitudes and phases.  
+The `MetaCycle` package that contains the JTKcycle method performs these two steps and provides amplitude and phase estimates in the results. On the other hand, `rain` must be followed by `harmonic.regression` to get the amplitudes and phases.  
 
-**Note** `harmonic.regression` gives the relative and *not* the absolute amplitudes.  
+**Note:** `harmonic.regression` gives the relative and *not* the absolute amplitudes.  
 
 > It is common to follow a q-value-based selection of rhythmic timeseries by a relative amplitude-based filtering.
 
@@ -480,7 +512,7 @@ Such timeseries are statistically but *not biologically* significant. Therefore,
 
 As mentioned earlier, the ability to detect rhythms is extremely sensitive to the sampling of the timeseries.
 
-> For the very good rhythm detection, the current consensus is sampling every 2h over two circadian cycles. 
+> For very good rhythm detection, the current consensus is sampling every 2h over two circadian cycles (without replicates per sample). Having biological replicates at each timepoint would allow one to relax both of these requirements.
 
 > For estimating phases and amplitudes, higher sampling is preferred. Accuracy of phase is about half the sampling interval.
 
@@ -497,7 +529,7 @@ Step 2. Preprocess the data to a matrix of values. E.g., using `oligo` or `affy`
 
 Step 3. Normalize the data according to the technology for inter-sample variation  
 
-Step 4. Exploratory analysis to check for batch effects, bad samples etc.  
+Step 4. Exploratory analysis (PCA, MDS plots) to check for batch effects, bad samples etc.  
 
 Step 5. Filtering out lowly-expressed genes based on mean/median expression.  
 
@@ -512,11 +544,11 @@ Step 8. Plot the results, perform GO analysis, ....
 ***
 <br>
 
-Often experiments in the lab produce smaller number of timeseries. All the discussed methods can also be used on such data.
+Often experiments in the lab produce smaller numbers of timeseries. All the discussed methods can also be used on such data.
 
 However, one must bear in mind the disadvantages of the the particular method when you have few time samples/replicates. Also, since one performs fewer tests, one can opt for more conservative multiple-correction procedures, such as Boneferroni.
 
-With very coarse data, the non-parametric methods are better as they make fewer assumptions.
+With very coarsely sampled data, the non-parametric methods are better as they make fewer assumptions.
 
 The most statistically powerful method (when all else fails/one should start with this) is **one-way ANOVA** with time as the factor. If this is significant we known that measured quantity is time-dependent **not** that is rhythmic.
 
@@ -528,7 +560,7 @@ The most statistically powerful method (when all else fails/one should start wit
 
 **3.** Think about the analysis before you run experiments. If needed, get in touch with biostatistician/bioinformatician.
 
-**4.** P-value > threshold does not mean the timeseries is not rhythmic, only that the evidence is inconclusive. Absence of evidence is **not** evidence of absence.
+**4.** P-value/Q-value > threshold does not mean the timeseries is not rhythmic, only that the evidence is inconclusive. Absence of evidence is **not** evidence of absence.
 
 **5.** Never duplicate and concatenate data before running statistics (@hughes_guidelines_2017)
 
