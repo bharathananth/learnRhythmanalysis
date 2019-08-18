@@ -26,6 +26,27 @@ theme_set(theme_bw())
 options(shiny.port=2123, tutorial.exercise.timelimit=180)
 ```
 
+## Notes on the tutorial
+***
+<br>
+
+* The tutorial is a mixture of a lecture and few interactive exercises (Ex. 1-9).
+
+* The tutorial is designed to give a broad overview of rhythm analysis in chronobiology. It is (hopefully) self-contained and so should be accessible without my presence.
+
+* R code and packages are highlighted like `this`. 
+
+* Type in your code and press **RUN CODE** to execute it. *Important*: type the variable name you want to view in the last line of the code by itself to view the result.
+
+* *Hints* and *Solutions* are provided to help you. Sometimes, the answer is revealed step by step.  *Note:* If you click *next hint* there is no way of going back, except by clicking *Start Over* in the table of contents on the left of your screen.
+
+* There often multiple equivalent ways to code the same steps (my codes is just one possible way)
+
+* An exercise often needs to be solved first before proceeding in the tutorial.
+
+* Additional resources are listed at the end. 
+
+* Feel free to ask questions and send me comments via email, Twitter and in person.
 
 ## Circadian data
 ***
@@ -60,8 +81,11 @@ m <- 12
 ```
 
 ```{r rhy_params-hint}
+# Computing the relative amplitude 'a' and the fold-amplitude 'f'
 a <- A/m
 f <- (1+a)/(1-a)
+
+# Just the variable names cause the values stored to be displayed
 a
 f
 ```
@@ -75,11 +99,11 @@ m <- 12
 t <- seq(0, 24, by = 0.5)
 df <- data.frame(t, s = m + A*sin(2*pi*t/24))
 f1 <- ggplot(df) + geom_line(aes(x=t, y = s)) + theme_bw() +
-  labs(title = "Actual scale", x = "time", y="") 
+  labs(title = sprintf("Actual scale: A = %d, m = %d", A, m), x = "time", y="") 
 a <- A/m
 df <- data.frame(t, s = 1 + a*sin(2*pi*t/24))
 f2 <- ggplot(df) + geom_line(aes(x=t, y = s)) + theme_bw() +
-  labs(title = "Normalized scale", x = "time", y="")
+  labs(title = sprintf("Normalized scale: A = %d, m = %d", A, m), x = "time", y="")
 grid.arrange(f1, f2, nrow=1)
 ```
 
@@ -115,6 +139,7 @@ In reality, many shapes are possible
 
 Many common techniques, such as qPCR and western blots, can yield either type of data!
 <br>
+Hybrid schemes involving biological replicates of longitudinal sampling is possible and common, but will not be discussed here.
 
 ## Genomic data
 ***
@@ -134,8 +159,9 @@ hughes_data$time <- as.numeric(gsub("CT","",hughes_data$time))
 ```
 ### Ex. 3
 *To be able to plot using `ggplot2` one needs the above data in a different 'long' format. The `cycMouseLiverRNA` in the long form is stored in `hughes_data`.*
+
 *Plot a few of your favorite clock genes from `hughes_data`(probe names are in the leftmost column of the data)*
-```{r hughes_plot1, exercise=TRUE, exercise.setup="hughes_intro-setup", fig.height=3, exercise.lines=2}
+```{r hughes_plot1, exercise=TRUE, exercise.setup="hughes_intro-setup", fig.height=3, exercise.lines=5}
 
 ```
 
@@ -168,6 +194,8 @@ qplot(time, log2(expr),
       xlab = "time (h)", ylab = "log2 expression")
 ```
 
+What differences do you observe?
+
 ## Harmonic Regression
 ***
 > We are going to first discuss detection of rhythms only. Estimation of amplitude and phase will come later.
@@ -180,7 +208,9 @@ Do you recognise the different parameters from [earlier](#circadian-data)?
 
 The above equation is exactly the same as this one:  
 
-$$ y(t) = m + c_1 \cos\left(\frac{2\pi t}{\tau}\right) + c_2 \sin\left(\frac{2\pi t}{\tau}\right)$$  
+$$ y(t) = m + c_1 \cos\left(\frac{2\pi t}{\tau}\right) + c_2 \sin\left(\frac{2\pi t}{\tau}\right)$$
+
+$$ A = \sqrt{c_1^2 + c_2^2} ~~\textrm{and}~~ \phi = \tan^{-1}\left(\frac{c_2}{c_1}\right)$$
 
 If you can confidently fix $\tau$, for e.g., $\tau = 24$ for mice or $\tau = 22.5$ for *N. crassa*, then this becomes a least-squares fitting exercise. You might be more familiar with this as linear regression or fitting a straight line through a cloud of points.  
 
@@ -198,20 +228,22 @@ Very flexible. So other trends in data can be included| |
 ### Ex. 5
 
 *Let us look at the same liver dataset from before.*
+
 *Load the data in the workspace*
+
 *View the first few lines of the dataset using `head` command*
 ```{r hughes_data, exercise=TRUE, exercise.lines=8}
 
 ```
 
 ```{r hughes_data-solution, exercise.eval=FALSE}
-# To see the list of datasets in this package
-# data(package="learnRhythmanalysis")
+## Step 0: To see the list of datasets in this package
+## data(package="learnRhythmanalysis")
 
-# Load the dataset
+## Step 1. Load the dataset
 data("hughes_2009_liver", package = "learnRhythmanalysis")
 
-# View the first few rows of the dataset
+## Step 2. View the first few rows of the dataset
 head(hughes_2009_liver)
 ```
 
@@ -221,7 +253,9 @@ head(hughes_2009_liver)
 library(HarmonicRegression)
 data("hughes_2009_liver", package = "learnRhythmanalysis")
 ```
-*Use the `harmonic.regression()` function in the package `HarmonicRegression` for rhythm analysis. Run the analysis on the @hughes_harmonics_2009 data and store the results in the `results` variable*
+*Use the `harmonic.regression()` function in the package `HarmonicRegression` for rhythm analysis.*
+
+*Run the analysis on the @hughes_harmonics_2009 data and store the results in the `results` variable*
 
 *View the contents of the results. It includes amplitudes, phases and p-values*
 ```{r hughes_harmonic, exercise=TRUE}
@@ -248,7 +282,8 @@ data("hughes_2009_liver", package = "learnRhythmanalysis")
 ## Step 2. Make the data into a matrix of numbers. Move gene names to rownames/columnnames as the case may be.
 
 hughes_data <- as.matrix(hughes_2009_liver[-1]) ## drop the gene symbols in the first column)
-rownames(hughes_data) <- hughes_2009_liver$GeneName ## matrix in R can have rownames and columnnames
+rownames(hughes_data) <- hughes_2009_liver$geneName ## matrix in R can have rownames and columnnames
+# hughes_data (if you want to see how the matrix looks)
 ```
 
 ```{r hughes_harmonic-hint-3}
@@ -258,7 +293,7 @@ hughes_data <- t(hughes_data) ## t() is a transpose operator
 
 ## Step 4. Create a vector of time points to match samples to times (this information is in the column names of the original data)
 
-times <- seq(1,48) # create a vector of sample times
+times <- seq(18, 65) # create a vector of sample times
 ```
 
 ```{r hughes_harmonic-hint-4}
@@ -270,8 +305,8 @@ results <- harmonic.regression(inputts = hughes_data,
                                normalize = TRUE)
 
 ## Step 6. View the results
-
-ls.str(results) # the same information is available from the help for the function, i.e., type ?harmonic.regression
+# the same information is available from the help for the function, i.e., type ?harmonic.regression
+ls.str(results) 
 ```
 
 The important information in this list are `pars` (contains amplitudes and phase), `pvals` (p-values) and `qvals` (q-values).
@@ -290,7 +325,7 @@ Normally, we correct the p-values for multiple testing to obtain **q-values** or
 
 ### Ex. 7
 
-*I have generated a matrix of random (normally distributed) values, i.e., there are no rhythms in this data.*
+*I have generated a matrix of random (normally distributed) values, i.e., there are no rhythms in this data. (New data will be generated each time you press RUN CODE)*
 
 *First, perform harmonic regression*
 
@@ -512,7 +547,7 @@ Such timeseries are statistically but *not biologically* significant. Therefore,
 
 As mentioned earlier, the ability to detect rhythms is extremely sensitive to the sampling of the timeseries.
 
-> For very good rhythm detection, the current consensus is sampling every 2h over two circadian cycles (without replicates per sample). Having biological replicates at each timepoint would allow one to relax both of these requirements.
+> For very good rhythm detection, the rule-of-thumb is sampling every 2h over two circadian cycles (without replicates per sample). Having biological replicates at each timepoint would allow one to relax both of these requirements.
 
 > For estimating phases and amplitudes, higher sampling is preferred. Accuracy of phase is about half the sampling interval.
 
@@ -562,7 +597,7 @@ The most statistically powerful method (when all else fails/one should start wit
 
 **4.** P-value/Q-value > threshold does not mean the timeseries is not rhythmic, only that the evidence is inconclusive. Absence of evidence is **not** evidence of absence.
 
-**5.** Never duplicate and concatenate data before running statistics (@hughes_guidelines_2017)
+**5.** Never duplicate and concatenate data before running statistics or plotting (@hughes_guidelines_2017)
 
 **6.** Control for multiple testing (@hughes_guidelines_2017)
 
@@ -573,7 +608,7 @@ The most statistically powerful method (when all else fails/one should start wit
 **9.** Never do two tests when you can get away with one -- do differential rhythmicity analysis when you compare two rhythms (@thaben_differential_2016)  
 
 ## References and Resources
- Learn programming in R with free [book](https://r4ds.had.co.nz)  |      ![](images/cover_wickham.png){width=100px}
+ Learn programming in R with this free [book](https://r4ds.had.co.nz)  |      ![](images/cover_wickham.png){width=100px}
  
  [MetaCycle](https://cran.r-project.org/web/packages/MetaCycle/vignettes/implementation.html) package for running three different rhythm analysis tools 
  

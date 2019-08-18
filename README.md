@@ -13,11 +13,24 @@ There are many proposed methods for circadian rhythm analysis. Often, it is uncl
 4.	to direct you to resources to learn more
 5.	most importantly, to make you think about these issue BEFORE you design your experiments
 
-### Installation and Running the Tutorial
+### EBRS 2019 Trainee day attendees.
+
+I will assume you have some basic knowledge of R (although this is not essential to sit through the tutorial, but eventually you will need it to apply the methods).
+
+It is sufficient if each pair of attendees has a laptop between them.
+
+Bring your **fully-charged** laptops to the session.  
+
+Preferably, follow steps 0-5 in the installation guide **before** trainee day. **If** the installation does not work please come *at least 15 min before the session starts* so that we can help you get set up. 
+
+Come with your data, curiousity and questions. Look forward to seeing you.
+
+
+### Installation and running the Tutorial
 
 0. Before you install the package, please set your default browser to Safari/Firefox/Chrome. Internet Explorer does not work properly with shiny apps.
 
-1. Install R on your computer (choosing the appropriate version for Windows, Linux or Mac) from [CRAN](https://cran.r-project.org)
+1. Install R (newer than version 3.6.0) on your computer (choosing the appropriate version for Windows, Linux or Mac) from [CRAN](https://cran.r-project.org)
 
 2. Download and Install (the free) [RStudio Desktop](https://www.rstudio.com/products/rstudio/download/#download) for your operating system
 
@@ -31,6 +44,7 @@ BiocManager::install()
 4. Install required packages with:
 ```r
 install.packages(c("learnr", "devtools"))
+
 BiocManager::install("rain")
 ```
 
@@ -44,13 +58,3 @@ devtools::install_github("bharathananth/learnRhythmanalysis")
 ```r
 learnr::run_tutorial("tutorial", package = "learnRhythmanalysis")
 ```
-
-### EBRS Trainee day attendees.
-
-I will assume you have some basic knowledge of R (although this is not essential to sit through the tutorial, but eventually you will need it to apply the methods).  
-
-Bring your **fully-charged** laptops to the session.  
-
-Preferably, follow steps 0-6 in the installation guide **before** trainee day.  
-
-Come with your data, curiousity and questions. Look forward to seeing you.
