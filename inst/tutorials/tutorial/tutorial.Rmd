@@ -60,7 +60,7 @@ options(shiny.port=2123, tutorial.exercise.timelimit=180)
 
 $A$ = (absolute) amplitude  
 
-$m$ = magnitude  
+$m$ = magnitude or mesor 
 
 $\tau$ = intrinsic period  
 
@@ -610,7 +610,7 @@ The most statistically powerful method (when all else fails/one should start wit
 ## References and Resources
  Learn programming in R with this free [book](https://r4ds.had.co.nz)  |      ![](images/cover_wickham.png){width=100px}
  
- [MetaCycle](https://cran.r-project.org/web/packages/MetaCycle/vignettes/implementation.html) package for running three different rhythm analysis tools 
+ [MetaCycle](https://cran.r-project.org/web/packages/MetaCycle/vignettes/implementation.html) package for running three different rhythm analysis tools and a faster version with quality control called [DiscoRhythm](https://doi.org/doi:10.18129/B9.bioc.DiscoRhythm)
  
  Well-managed repositories for biological data analysis [Bioconductor](https://www.bioconductor.org/). They also have many workflows and tools to make your life easier.
  
